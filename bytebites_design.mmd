@@ -1,0 +1,41 @@
+classDiagram
+    direction LR
+
+    class Customer {
+        +str name
+        +list~Order~ purchase_history
+        +__init__(str name)
+        +record_purchase(Order order) None
+        +get_purchase_history() list~Order~
+        +is_verified_user() bool
+    }
+
+    class MenuItem {
+        +str name
+        +Decimal price
+        +str category
+        +float popularity_rating
+        +__init__(str name, Decimal price, str category, float popularity_rating)
+    }
+
+    class Menu {
+        +list~MenuItem~ items
+        +__init__()
+        +add_item(MenuItem item) None
+        +remove_item(MenuItem item) None
+        +get_all_items() list~MenuItem~
+        +filter_by_category(str category) list~MenuItem~
+    }
+
+    class Order {
+        +list~MenuItem~ selected_items
+        +__init__()
+        +add_item(MenuItem item) None
+        +remove_item(MenuItem item) None
+        +compute_total() Decimal
+    }
+
+    Customer "1" --> "0..*" Order : purchase history
+    Menu "1" o-- "0..*" MenuItem : holds
+    Order "0..*" --> "0..*" MenuItem : selects
+    Customer ..> Menu : browses
