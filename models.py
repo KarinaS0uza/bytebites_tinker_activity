@@ -11,26 +11,15 @@ class Customer:
         self.purchase_history: list[Order] = []
 
     def record_purchase(self, order: Order) -> None:
-        """Add an order to the purchase history.
-
-        Callers should call this after a purchase is made. This method does
-        not confirm that a purchase actually occurred.
-        """
+        """Add an order to the purchase history."""
         self.purchase_history.append(order)
 
     def get_purchase_history(self) -> list[Order]:
-        """Return a copy of the purchase history list.
-
-        The list is a new list, but it contains the same Order objects as the
-        original.
-        """
+        """Return a copy of the purchase history list."""
         return list(self.purchase_history)
 
     def is_verified_user(self) -> bool:
-        """Return True if the customer has at least one past purchase.
-
-        This is a simple purchase-history check, not identity authentication.
-        """
+        """Return True if the customer has at least one past purchase."""
         return len(self.purchase_history) > 0
 
 
@@ -47,7 +36,7 @@ class MenuItem:
 
 
 class Menu:
-    """Manages the collection of menu items and filters by category."""
+    """Manages menu items, filters by category, and sorts item lists."""
 
     def __init__(self) -> None:
         self.items: list[MenuItem] = []
@@ -56,19 +45,44 @@ class Menu:
         self.items.append(item)
 
     def remove_item(self, item: MenuItem) -> None:
-        if item in self.items:
-            self.items.remove(item)
+        self.items.remove(item)
 
     def get_all_items(self) -> list[MenuItem]:
         return list(self.items)
 
     def filter_by_category(self, category: str) -> list[MenuItem]:
-        """Return items in the category, ignoring upper/lower case."""
+        """Return matching items in a new list, ignoring capitalization.
+
+        Keep the menu's original order. Return an empty list if nothing matches.
+        """
         matches: list[MenuItem] = []
+        category_lower = category.lower()
+
         for item in self.items:
-            if item.category.lower() == category.lower():
+            if item.category.lower() == category_lower:
                 matches.append(item)
+
         return matches
+
+    def sort_by_price(
+        self, items: list[MenuItem], descending: bool = False
+    ) -> list[MenuItem]:
+        """Return a new list sorted cheapest first, or highest first if descending.
+
+        Keep equal-price items in their original order and leave items unchanged.
+        """
+        return sorted(items, key=lambda item: item.price, reverse=descending)
+
+    def sort_by_popularity(
+        self, items: list[MenuItem], descending: bool = True
+    ) -> list[MenuItem]:
+        """Return a new list sorted highest rating first, or lowest if not descending.
+
+        Keep equal-rating items in their original order and leave items unchanged.
+        """
+        return sorted(
+            items, key=lambda item: item.popularity_rating, reverse=descending
+        )
 
 
 class Order:
@@ -81,11 +95,11 @@ class Order:
         self.selected_items.append(item)
 
     def remove_item(self, item: MenuItem) -> None:
-        if item in self.selected_items:
-            self.selected_items.remove(item)
+        self.selected_items.remove(item)
 
     def compute_total(self) -> Decimal:
-        total = Decimal("0")
-        for item in self.selected_items:
-            total += item.price
-        return total
+        """Add selected prices using Decimal, counting each repeated selection.
+
+        Return Decimal("0") for an empty order. Include only item prices.
+        """
+        return sum((item.price for item in self.selected_items), Decimal("0"))
