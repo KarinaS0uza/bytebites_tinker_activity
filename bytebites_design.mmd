@@ -1,41 +1,81 @@
 classDiagram
-    direction LR
+    direction TB
 
     class Customer {
+        +int MIN_NAME_LENGTH$
+        +int MAX_NAME_LENGTH$
+        +str DEFAULT_NAME$
+        +int MAX_ORDERS$
+        -str _name
+        -list~Order~ _purchase_history
         +str name
         +list~Order~ purchase_history
-        +__init__(str name)
-        +record_purchase(Order order) None
+        +__init__(name: str | None) None
+        +set_name(name: str | None) bool
+        +get_order_count() int
+        +get_order(index: int) Order | None
+        +record_purchase(order: Order | None) bool
         +get_purchase_history() list~Order~
+        +browse_menu(menu: Menu | None, category: str | None) list~MenuItem~
         +is_verified_user() bool
     }
 
+    class Menu {
+        +int MAX_ITEMS$
+        -list~MenuItem~ _items
+        +list~MenuItem~ items
+        +__init__() None
+        +get_item_count() int
+        +get_item(index: int) MenuItem | None
+        +add_item(item: MenuItem | None) bool
+        +remove_item(item: MenuItem) None
+        +get_all_items() list~MenuItem~
+        +filter_by_category(category: str | None) list~MenuItem~
+        +sort_by_price(items: list~MenuItem~, descending: bool=False) list~MenuItem~
+        +sort_by_popularity(items: list~MenuItem~, descending: bool=True) list~MenuItem~
+    }
+
     class MenuItem {
+        +int MIN_NAME_LENGTH$
+        +int MAX_NAME_LENGTH$
+        +int MIN_CATEGORY_LENGTH$
+        +int MAX_CATEGORY_LENGTH$
+        +Decimal MIN_PRICE$
+        +Decimal MAX_PRICE$
+        +float MIN_POPULARITY_RATING$
+        +float MAX_POPULARITY_RATING$
+        +str DEFAULT_NAME$
+        +Decimal DEFAULT_PRICE$
+        +str DEFAULT_CATEGORY$
+        +float DEFAULT_POPULARITY_RATING$
+        -str _name
+        -Decimal _price
+        -str _category
+        -float _popularity_rating
         +str name
         +Decimal price
         +str category
         +float popularity_rating
-        +__init__(str name, Decimal price, str category, float popularity_rating)
-    }
-
-    class Menu {
-        +list~MenuItem~ items
-        +__init__()
-        +add_item(MenuItem item) None
-        +remove_item(MenuItem item) None
-        +get_all_items() list~MenuItem~
-        +filter_by_category(str category) list~MenuItem~
+        +__init__(name: str | None, price: Decimal, category: str | None, popularity_rating: float) None
+        +set_name(name: str | None) bool
+        +set_price(price: Decimal) bool
+        +set_category(category: str | None) bool
+        +set_popularity_rating(popularity_rating: float) bool
     }
 
     class Order {
+        +int MAX_ITEMS$
+        -list~MenuItem~ _selected_items
         +list~MenuItem~ selected_items
-        +__init__()
-        +add_item(MenuItem item) None
-        +remove_item(MenuItem item) None
+        +__init__() None
+        +get_item_count() int
+        +get_item(index: int) MenuItem | None
+        +add_item(item: MenuItem | None) bool
+        +remove_item(item: MenuItem) None
         +compute_total() Decimal
     }
 
-    Customer "1" --> "0..*" Order : purchase history
-    Menu "1" o-- "0..*" MenuItem : holds
-    Order "0..*" --> "0..*" MenuItem : selects
+    Customer "1" --> "0..100" Order : places
     Customer ..> Menu : browses
+    Menu "1" o-- "0..50" MenuItem : contains
+    Order "*" o-- "0..50" MenuItem : includes
